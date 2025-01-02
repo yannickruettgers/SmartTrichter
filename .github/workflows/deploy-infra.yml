@@ -12,6 +12,7 @@ jobs:
   deploy:
     name: Deploy to ${{ github.ref_name }}
     runs-on: ubuntu-latest
+    environment: ${{ github.ref_name }}
 
     permissions:
       id-token: write
@@ -29,16 +30,6 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
-
-      - name: Debug Info
-        run: |
-          echo "AWS_REGION: ${{ env.AWS_REGION }}"
-          echo "ORG_OR_USER: ${{ env.ORG_OR_USER }}"
-          echo "REPO: ${{ env.REPO }}"
-          echo "ALLOWED_ACTIONS: ${{ env.ALLOWED_ACTIONS }}"
-          echo "ALLOWED_RESOURCES: ${{ env.ALLOWED_RESOURCES }}"
-          echo "ENVIRONMENT: ${{ env.ENVIRONMENT }}"
-          echo "ACTIONS_ROLE_ARN: ${{ env.ACTIONS_ROLE_ARN }}"
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
