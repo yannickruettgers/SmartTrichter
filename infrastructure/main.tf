@@ -56,7 +56,7 @@ resource "aws_iam_role" "github_actions_role" {
         Action = "sts:AssumeRoleWithWebIdentity",
         Condition = {
           StringLike = {
-            "token.actions.githubusercontent.com:sub" : "repo:${var.github_org_or_user}/${var.github_repo}:*"
+            "token.actions.githubusercontent.com:sub" : "repo:${var.org_or_user}/${var.repo}:*"
           }
         }
       }
@@ -81,4 +81,12 @@ resource "aws_iam_policy" "github_actions_policy" {
 resource "aws_iam_role_policy_attachment" "github_actions_policy_attachment" {
   role       = aws_iam_role.github_actions_role.name
   policy_arn = aws_iam_policy.github_actions_policy.arn
+}
+
+resource "aws_s3_bucket" "app_bucket" {
+  bucket = "$var.environment}-trichter-app-bucket"
+  tags = {
+    Name        = "Trichter App Bucket"
+    Environment = var.environment
+  }
 }

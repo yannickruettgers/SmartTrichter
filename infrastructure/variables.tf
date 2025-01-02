@@ -4,12 +4,12 @@ variable "aws_region" {
   default     = "us-east-1"
 }
 
-variable "github_org_or_user" {
+variable "org_or_user" {
   description = "GitHub organization or username."
   type        = string
 }
 
-variable "github_repo" {
+variable "repo" {
   description = "GitHub repository name."
   type        = string
 }
@@ -24,4 +24,10 @@ variable "allowed_resources" {
   description = "List of allowed resources for the IAM policy."
   type        = list(string)
   default     = ["*"]
+}
+
+variable "environment" {
+  description = "The environment to deploy resources to."
+  type        = string
+  default     = "dev"
 }
