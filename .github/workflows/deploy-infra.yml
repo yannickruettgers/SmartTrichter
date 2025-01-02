@@ -24,6 +24,7 @@ jobs:
       ALLOWED_ACTIONS: ${{ vars.ALLOWED_ACTIONS }}
       ALLOWED_RESOURCES: ${{ vars.ALLOWED_RESOURCES }}
       ENVIRONMENT: ${{ github.ref_name }}
+      ACTIONS_ROLE_ARN: ${{ secrets.ACTIONS_ROLE_ARN }}
 
     steps:
       - name: Checkout Code
@@ -32,7 +33,7 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.ACTIONS_ROLE_ARN }}
+          role-to-assume: ${{ env.ACTIONS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Install Terraform
