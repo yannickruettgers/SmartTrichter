@@ -3,3 +3,6 @@
 *.tfstate.*
 .terraform/
 terraform.tfvars
+
+# Node files
+node_modules/

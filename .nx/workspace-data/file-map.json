@@ -1,0 +1,75 @@
+{
+  "version": "6.0",
+  "nxVersion": "20.0.0",
+  "pathMappings": {},
+  "nxJsonPlugins": [],
+  "fileMap": {
+    "projectFileMap": {},
+    "nonProjectFiles": [
+      {
+        "file": ".github/workflows/backend.yml",
+        "hash": "9694756336766948934"
+      },
+      {
+        "file": ".github/workflows/deploy-infra.yml",
+        "hash": "14293872240335022364"
+      },
+      {
+        "file": ".github/workflows/frontend.yml",
+        "hash": "15094887248811143713"
+      },
+      {
+        "file": ".github/workflows/infrastructure.yml",
+        "hash": "3244421341483603138"
+      },
+      {
+        "file": ".github/workflows/trigger-deployments.yml",
+        "hash": "3244421341483603138"
+      },
+      {
+        "file": ".gitignore",
+        "hash": "10321847280964446989"
+      },
+      {
+        "file": "README.md",
+        "hash": "1487077647109083590"
+      },
+      {
+        "file": "infrastructure/.terraform.lock.hcl",
+        "hash": "15793804489969559288"
+      },
+      {
+        "file": "infrastructure/main.tf",
+        "hash": "10860515122995210492"
+      },
+      {
+        "file": "infrastructure/outputs.tf",
+        "hash": "2369519718207935596"
+      },
+      {
+        "file": "infrastructure/provider.tf",
+        "hash": "982575905535945611"
+      },
+      {
+        "file": "infrastructure/variables.tf",
+        "hash": "14363165951152054796"
+      },
+      {
+        "file": "nx.json",
+        "hash": "12059480475095639479"
+      },
+      {
+        "file": "package-lock.json",
+        "hash": "11974072230883001857"
+      },
+      {
+        "file": "package.json",
+        "hash": "16145418339776056702"
+      },
+      {
+        "file": "workspace.json",
+        "hash": "3244421341483603138"
+      }
+    ]
+  }
+}

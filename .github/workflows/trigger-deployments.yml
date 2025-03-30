@@ -1,0 +1,77 @@
+name: Trigger Deployments
+
+on:
+  push:
+    branches:
+      - dev
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  setup:
+    name: Setup Environment and Trigger Sub-Workflows
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    outputs:
+      affected_projects: ${{ steps.detect_affected.outputs.affected }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Install Nx
+        run: npm install -g nx
+
+      - name: Detect Affected Projects
+        id: detect_affected
+        run: |
+          nx affected:apps --base=main > affected.txt
+          echo "affected=$(cat affected.txt)" >> $GITHUB_ENV
+
+      - name: Trigger Infrastructure Workflow
+        if: contains(env.affected, 'infrastructure')
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'infrastructure.yml',
+              ref: context.ref,
+              inputs: {
+                environment: '${{ github.ref == "refs/heads/main" ? "prod" : "dev" }}'
+              }
+            })
+
+      - name: Trigger Backend Workflow
+        if: contains(env.affected, 'backend')
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'backend.yml',
+              ref: context.ref,
+              inputs: {
+                environment: '${{ github.ref == "refs/heads/main" ? "prod" : "dev" }}'
+              }
+            })
+
+      - name: Trigger Frontend Workflow
+        if: contains(env.affected, 'frontend')
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'frontend.yml',
+              ref: context.ref,
+              inputs: {
+                environment: '${{ github.ref == "refs/heads/main" ? "prod" : "dev" }}'
+              }
+            })

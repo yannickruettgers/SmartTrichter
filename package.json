@@ -1,0 +1,24 @@
+{
+    "name": "SmartTrichter",
+    "version": "0.0.1",
+    "description": "Smart Trichter App, enabling Smart Trichtering.",
+    "main": "index.js",
+    "scripts": {
+      "start": "echo 'No start script needed for this project'",
+      "test": "echo 'No test script specified' && exit 1"
+    },
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/yannickruettgers/SmartTrichter.git"
+    },
+    "keywords": ["static-web", "serverless", "infrastructure"],
+    "author": "Yannick-Luca Ruettgers",
+    "license": "UNLICENSED",
+    "dependencies": {
+      "aws-sdk": "^2.1357.0"
+    },
+    "devDependencies": {
+      "serverless": "^3.32.1",
+      "nx": "20.0.0"
+    }
+  }

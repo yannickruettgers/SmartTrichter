@@ -1,0 +1,11 @@
+[NX Daemon Server] - 2025-01-12T17:05:00.409Z - Started listening on: \\.\pipe\nx\C:\Users\yanni\AppData\Local\Temp\8ddcca7a571d654f951b\d.sock
+[NX Daemon Server] - 2025-01-12T17:05:00.412Z - [WATCHER]: Subscribed to changes within: C:\Users\yanni\OneDrive\Dokumente\Trichter\SmartTrichter\SmartTrichter (native)
+[NX Daemon Server] - 2025-01-12T17:05:00.414Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2025-01-12T17:05:00.416Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2025-01-12T17:05:00.417Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2025-01-12T17:05:00.419Z - [REQUEST]: Responding to the client. Shutdown initiated
+[NX Daemon Server] - 2025-01-12T17:05:00.420Z - Done responding to the client Shutdown initiated
+[NX Daemon Server] - 2025-01-12T17:05:00.423Z - Handled FORCE_SHUTDOWN. Handling time: 1. Response time: 4.
+[NX Daemon Server] - 2025-01-12T17:05:00.423Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2025-01-12T17:05:00.423Z - [WATCHER]: Stopping the watcher for C:\Users\yanni\OneDrive\Dokumente\Trichter\SmartTrichter\SmartTrichter (sources)
+[NX Daemon Server] - 2025-01-12T17:05:00.423Z - [WATCHER]: Stopping the watcher for C:\Users\yanni\OneDrive\Dokumente\Trichter\SmartTrichter\SmartTrichter (outputs)
