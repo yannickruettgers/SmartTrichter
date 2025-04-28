@@ -36,42 +36,39 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
+            const environment = context.ref === 'refs/heads/main' ? 'prod' : 'dev';
             github.rest.actions.createWorkflowDispatch({
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: 'infrastructure.yml',
               ref: context.ref,
-              inputs: {
-                environment: '${{ github.ref == "refs/heads/main" ? "prod" : "dev" }}'
-              }
-            })
+              inputs: { environment }
+            });
 
       - name: Trigger Backend Workflow
         if: contains(env.affected, 'backend')
         uses: actions/github-script@v6
         with:
           script: |
+            const environment = context.ref === 'refs/heads/main' ? 'prod' : 'dev';
             github.rest.actions.createWorkflowDispatch({
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: 'backend.yml',
               ref: context.ref,
-              inputs: {
-                environment: '${{ github.ref == "refs/heads/main" ? "prod" : "dev" }}'
-              }
-            })
+              inputs: { environment }
+            });
 
       - name: Trigger Frontend Workflow
         if: contains(env.affected, 'frontend')
         uses: actions/github-script@v6
         with:
           script: |
+            const environment = context.ref === 'refs/heads/main' ? 'prod' : 'dev';
             github.rest.actions.createWorkflowDispatch({
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: 'frontend.yml',
               ref: context.ref,
-              inputs: {
-                environment: '${{ github.ref == "refs/heads/main" ? "prod" : "dev" }}'
-              }
-            })
+              inputs: { environment }
+            });
