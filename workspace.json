@@ -15,8 +15,7 @@
       "infrastructure": {
         "root": "infrastructure",
         "sourceRoot": "infrastructure",
-        "projectType": "library"
+        "projectType": "application"
       }
     }
-  }
-  
+}

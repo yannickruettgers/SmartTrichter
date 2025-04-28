@@ -28,7 +28,10 @@ jobs:
       - name: Detect Affected Projects
         id: detect_affected
         run: |
-          nx affected:apps --base=main > affected.txt
+          set -e
+          echo "Detecting affected projects..."
+          nx affected:apps --base=main > affected.txt || echo "No affected projects detected" > affected.txt
+          cat affected.txt
           echo "affected=$(cat affected.txt)" >> $GITHUB_ENV
 
       - name: Trigger Infrastructure Workflow
