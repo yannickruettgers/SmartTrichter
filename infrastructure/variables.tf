@@ -31,3 +31,8 @@ variable "environment" {
   type        = string
   default     = "dev"
 }
+
+variable "user_creation_lambda_package" {
+  description = "Path to the deployment package for the user creation Lambda function."
+  type        = string
+}
