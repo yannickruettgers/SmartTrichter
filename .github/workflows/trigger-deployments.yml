@@ -30,8 +30,18 @@ jobs:
         run: |
           set -e
           echo "Detecting affected projects..."
-          nx affected:apps --base=main > affected.txt || echo "No affected projects detected" > affected.txt
-          cat affected.txt
+          if nx affected:apps --base=main > affected.txt 2> error.log; then
+            cat affected.txt
+          else
+            if grep -q "Nothing to be affected" error.log; then
+              echo "No affected projects detected" > affected.txt
+              cat affected.txt
+            else
+              echo "Error occurred:"
+              cat error.log
+              exit 1
+            fi
+          fi
           echo "affected=$(cat affected.txt)" >> $GITHUB_ENV
 
       - name: Trigger Infrastructure Workflow
@@ -60,7 +70,7 @@ jobs:
               workflow_id: 'backend.yml',
               ref: context.ref,
               inputs: { environment }
-            });
+            }); 
 
       - name: Trigger Frontend Workflow
         if: contains(env.affected, 'frontend')
