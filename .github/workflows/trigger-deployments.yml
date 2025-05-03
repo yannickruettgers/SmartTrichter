@@ -47,7 +47,7 @@ jobs:
           echo "backend=$backend" >> $GITHUB_ENV
           echo "infrastructure=$infrastructure" >> $GITHUB_ENV
 
-      - name: Set Boolean Outputs
+      - name: Set Outputs
         id: set
         run: |
           echo "frontend=${{ env.frontend }}" >> $GITHUB_OUTPUT
@@ -71,22 +71,18 @@ jobs:
     with:
       environment: ${{ needs.detect.outputs.environment }}
 
-  deploy:
-    name: Deploy Frontend & Backend
-    if: ${{ needs.detect.outputs.frontend == 'true' || needs.detect.outputs.backend == 'true' }}
+  deploy_backend:
+    name: Deploy Backend
+    if: ${{ needs.detect.outputs.backend == 'true' }}
     needs: [detect, infrastructure]
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        project: [frontend, backend]
-        include:
-          - project: frontend
-            run: ${{ needs.detect.outputs.frontend == 'true' }}
-          - project: backend
-            run: ${{ needs.detect.outputs.backend == 'true' }}
-    steps:
-      - name: Call ${{ matrix.project }} Workflow
-        if: matrix.run == true
-        uses: ./.github/workflows/${{ matrix.project }}.yml
-        with:
-          environment: ${{ needs.detect.outputs.environment }}
+    uses: ./.github/workflows/backend.yml
+    with:
+      environment: ${{ needs.detect.outputs.environment }}
+
+  deploy_frontend:
+    name: Deploy Frontend
+    if: ${{ needs.detect.outputs.frontend == 'true' }}
+    needs: [detect, infrastructure]
+    uses: ./.github/workflows/frontend.yml
+    with:
+      environment: ${{ needs.detect.outputs.environment }}
