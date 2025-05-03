@@ -1,11 +1,11 @@
 name: Deploy Backend
 
 on:
-  workflow_dispatch:
+  workflow_call:
     inputs:
       environment:
-        description: 'Environment to deploy to'
         required: true
+        type: string
 
 jobs:
   deploy:

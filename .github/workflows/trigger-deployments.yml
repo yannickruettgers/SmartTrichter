@@ -17,8 +17,9 @@ jobs:
       frontend: ${{ steps.set.outputs.frontend }}
       backend: ${{ steps.set.outputs.backend }}
       infrastructure: ${{ steps.set.outputs.infrastructure }}
+      environment: ${{ steps.env.outputs.environment }}
     steps:
-      - name: Checkout
+      - name: Checkout Code
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
@@ -34,19 +35,17 @@ jobs:
           echo "Changed files:"
           echo "$changed_files"
 
-          echo "frontend=false" >> $GITHUB_ENV
-          echo "backend=false" >> $GITHUB_ENV
-          echo "infrastructure=false" >> $GITHUB_ENV
+          frontend=false
+          backend=false
+          infrastructure=false
 
-          if echo "$changed_files" | grep -q "^frontend/"; then
-            echo "frontend=true" >> $GITHUB_ENV
-          fi
-          if echo "$changed_files" | grep -q "^backend/"; then
-            echo "backend=true" >> $GITHUB_ENV
-          fi
-          if echo "$changed_files" | grep -q "^infrastructure/"; then
-            echo "infrastructure=true" >> $GITHUB_ENV
-          fi
+          if echo "$changed_files" | grep -q "^frontend/"; then frontend=true; fi
+          if echo "$changed_files" | grep -q "^backend/"; then backend=true; fi
+          if echo "$changed_files" | grep -q "^infrastructure/"; then infrastructure=true; fi
+
+          echo "frontend=$frontend" >> $GITHUB_ENV
+          echo "backend=$backend" >> $GITHUB_ENV
+          echo "infrastructure=$infrastructure" >> $GITHUB_ENV
 
       - name: Set Boolean Outputs
         id: set
@@ -55,14 +54,22 @@ jobs:
           echo "backend=${{ env.backend }}" >> $GITHUB_OUTPUT
           echo "infrastructure=${{ env.infrastructure }}" >> $GITHUB_OUTPUT
 
+      - name: Set Deployment Environment
+        id: env
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "environment=prod" >> $GITHUB_OUTPUT
+          else
+            echo "environment=dev" >> $GITHUB_OUTPUT
+          fi
+
   infrastructure:
     name: Deploy Infrastructure
     if: ${{ needs.detect.outputs.infrastructure == 'true' }}
     needs: detect
-    runs-on: ubuntu-latest
-    steps:
-      - name: Deploy Infrastructure
-        run: echo "Running infrastructure deployment..." # Replace with your real deploy logic
+    uses: ./.github/workflows/infrastructure.yml
+    with:
+      environment: ${{ needs.detect.outputs.environment }}
 
   deploy:
     name: Deploy Frontend & Backend
@@ -80,4 +87,6 @@ jobs:
     steps:
       - name: Deploy ${{ matrix.project }}
         if: matrix.run == true
-        run: echo "Running ${{ matrix.project }} deployment..." # Replace with your real deploy logic
+        uses: ./.github/workflows/${{ matrix.project }}.yml
+        with:
+          environment: ${{ needs.detect.outputs.environment }}

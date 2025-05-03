@@ -1,8 +1,0 @@
-{
-    "$schema": "./node_modules/nx/schemas/nx-schema.json",
-    "npmScope": "SmartTrichter",
-    "affected": {
-      "defaultBase": "main"
-    }
-  }
-  
