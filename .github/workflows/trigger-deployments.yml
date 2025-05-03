@@ -30,18 +30,22 @@ jobs:
         run: |
           set -e
           echo "Detecting affected projects..."
-          if nx affected:apps --base=main > affected.txt 2> error.log; then
+          echo "Base branch: main"
+          echo "Running nx affected:apps..."
+          nx affected:apps --base=main > affected.txt 2> error.log || true
+          
+          if [ -s affected.txt ]; then
+            echo "Affected projects detected:"
             cat affected.txt
+          elif grep -q "Nothing to be affected" error.log; then
+            echo "No affected projects detected"
+            echo "No affected projects detected" > affected.txt
           else
-            if grep -q "Nothing to be affected" error.log; then
-              echo "No affected projects detected" > affected.txt
-              cat affected.txt
-            else
-              echo "Error occurred:"
-              cat error.log
-              exit 1
-            fi
+            echo "Error occurred during nx affected:apps:"
+            cat error.log
+            exit 1
           fi
+          
           echo "affected=$(cat affected.txt)" >> $GITHUB_ENV
 
       - name: Trigger Infrastructure Workflow
