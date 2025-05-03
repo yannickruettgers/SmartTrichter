@@ -7,6 +7,15 @@ on:
         required: true
         type: string
         description: The environment to deploy to (e.g., dev, prod).
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Select environment to deploy to'
+        required: true
+        type: choice
+        options:
+          - dev
+          - prod  
 
 jobs:
   deploy:
