@@ -85,7 +85,7 @@ jobs:
           - project: backend
             run: ${{ needs.detect.outputs.backend == 'true' }}
     steps:
-      - name: Deploy ${{ matrix.project }}
+      - name: Call ${{ matrix.project }} Workflow
         if: matrix.run == true
         uses: ./.github/workflows/${{ matrix.project }}.yml
         with:
