@@ -2,11 +2,17 @@ name: Deploy Frontend
 
 on:
   workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+        description: The environment to deploy to (e.g., dev, prod).
 
 jobs:
   deploy:
     name: Deploy Frontend
     runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
     permissions:
       id-token: write
       contents: read
