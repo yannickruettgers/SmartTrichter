@@ -11,50 +11,57 @@ on:
 
 jobs:
   setup:
-    name: Setup Environment and Trigger Sub-Workflows
+    name: Detect Affected Projects
     runs-on: ubuntu-latest
     permissions:
       id-token: write
       contents: read
     outputs:
-      affected_projects: ${{ steps.detect_affected.outputs.affected }}
+      affected: ${{ steps.set-output.outputs.affected }}
+      run_infrastructure: ${{ steps.set-output.outputs.run_infrastructure }}
+      run_frontend: ${{ steps.set-output.outputs.run_frontend }}
+      run_backend: ${{ steps.set-output.outputs.run_backend }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Install Nx
-        run: npm install -g nx
+      - name: Install Dependencies
+        run: npm ci
 
       - name: Detect Affected Projects
-        id: detect_affected
+        id: detect
         run: |
-          set -e
-          echo "Detecting affected projects..."
-          echo "Base branch: main"
-          echo "Running nx affected:apps..."
-          nx affected:apps --base=main > affected.txt 2> error.log || true
-          
-          if [ -s affected.txt ]; then
-            echo "Affected projects detected:"
-            cat affected.txt
-          elif grep -q "Nothing to be affected" error.log; then
-            echo "No affected projects detected"
-            echo "No affected projects detected" > affected.txt
-          else
-            echo "Error occurred during nx affected:apps:"
-            cat error.log
-            exit 1
-          fi
-          
-          echo "affected=$(cat affected.txt)" >> $GITHUB_ENV
+          echo "Detecting affected apps..."
+          npx nx show projects --affected --base=main --type=app > affected.json || echo '[]' > affected.json
+          cat affected.json
 
+      - name: Set Output
+        id: set-output
+        run: |
+          affected=$(cat affected.json | jq -c)
+          echo "affected=$affected" >> $GITHUB_OUTPUT
+
+          run_infra=$(echo $affected | jq 'contains(["infrastructure"])')
+          run_frontend=$(echo $affected | jq 'contains(["frontend"])')
+          run_backend=$(echo $affected | jq 'contains(["backend"])')
+
+          echo "run_infrastructure=$run_infra" >> $GITHUB_OUTPUT
+          echo "run_frontend=$run_frontend" >> $GITHUB_OUTPUT
+          echo "run_backend=$run_backend" >> $GITHUB_OUTPUT
+        shell: bash
+
+  infrastructure:
+    name: Deploy Infrastructure
+    if: ${{ fromJSON(needs.setup.outputs.run_infrastructure) }}
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
       - name: Trigger Infrastructure Workflow
-        if: contains(env.affected, 'infrastructure')
         uses: actions/github-script@v6
         with:
           script: |
             const environment = context.ref === 'refs/heads/main' ? 'prod' : 'dev';
-            github.rest.actions.createWorkflowDispatch({
+            await github.rest.actions.createWorkflowDispatch({
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: 'infrastructure.yml',
@@ -62,30 +69,35 @@ jobs:
               inputs: { environment }
             });
 
-      - name: Trigger Backend Workflow
-        if: contains(env.affected, 'backend')
+  deploy:
+    name: Deploy Affected Services
+    if: ${{ fromJSON(needs.setup.outputs.run_frontend) || fromJSON(needs.setup.outputs.run_backend) }}
+    needs: [setup, infrastructure] # ensure infra runs first (if needed)
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [frontend, backend]
+        include:
+          - service: frontend
+            should_run: ${{ fromJSON(needs.setup.outputs.run_frontend) }}
+          - service: backend
+            should_run: ${{ fromJSON(needs.setup.outputs.run_backend) }}
+    steps:
+      - name: Conditional Trigger for ${{ matrix.service }}
+        if: matrix.should_run == true
         uses: actions/github-script@v6
         with:
           script: |
             const environment = context.ref === 'refs/heads/main' ? 'prod' : 'dev';
-            github.rest.actions.createWorkflowDispatch({
+            const workflowMap = {
+              frontend: 'frontend.yml',
+              backend: 'backend.yml',
+            };
+            const workflow_id = workflowMap['${{ matrix.service }}'];
+            await github.rest.actions.createWorkflowDispatch({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              workflow_id: 'backend.yml',
-              ref: context.ref,
-              inputs: { environment }
-            }); 
-
-      - name: Trigger Frontend Workflow
-        if: contains(env.affected, 'frontend')
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const environment = context.ref === 'refs/heads/main' ? 'prod' : 'dev';
-            github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'frontend.yml',
+              workflow_id,
               ref: context.ref,
               inputs: { environment }
             });
