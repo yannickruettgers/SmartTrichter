@@ -2,10 +2,6 @@ name: Deploy Infrastructure
 
 on:
   workflow_call:
-    inputs:
-      environment:
-        required: true
-        type: string
 
 jobs:
   deploy:
@@ -23,7 +19,7 @@ jobs:
         with:
           role-to-assume: ${{ secrets.ACTIONS_ROLE_ARN }}
           aws-region: ${{ secrets.AWS_REGION }}
-          role-session-name: "${{ inputs.environment }}"  # ✅ fixed
+          role-session-name: "${{ vars.ENVIRONMENT }}"
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
@@ -31,11 +27,11 @@ jobs:
           terraform_version: latest
 
       - name: Terraform Init
-        run: terraform init -backend-config="key=${{ inputs.environment }}/terraform.tfstate"
+        run: terraform init -backend-config="key=${{ vars.ENVIRONMENT }}/terraform.tfstate"
         working-directory: infrastructure
 
       - name: Select Terraform Workspace
-        run: terraform workspace select ${{ inputs.environment }} || terraform workspace new ${{ inputs.environment }}
+        run: terraform workspace select ${{ vars.ENVIRONMENT }} || terraform workspace new ${{ vars.ENVIRONMENT }}
         working-directory: infrastructure
 
       - name: Terraform Plan

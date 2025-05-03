@@ -9,7 +9,6 @@ on:
       - main
   workflow_dispatch:
 
-
 permissions:
   id-token: write
   contents: read
@@ -73,21 +72,21 @@ jobs:
     if: ${{ needs.detect.outputs.infrastructure == 'true' }}
     needs: detect
     uses: ./.github/workflows/infrastructure.yml
-    with:
-      environment: ${{ needs.detect.outputs.environment }}
+    environment:
+      name: ${{ needs.detect.outputs.environment }}
 
   deploy_backend:
     name: Deploy Backend
     if: ${{ needs.detect.outputs.backend == 'true' }}
     needs: [detect, infrastructure]
     uses: ./.github/workflows/backend.yml
-    with:
-      environment: ${{ needs.detect.outputs.environment }}
+    environment:
+      name: ${{ needs.detect.outputs.environment }}
 
   deploy_frontend:
     name: Deploy Frontend
     if: ${{ needs.detect.outputs.frontend == 'true' }}
     needs: [detect, infrastructure]
     uses: ./.github/workflows/frontend.yml
-    with:
-      environment: ${{ needs.detect.outputs.environment }}
+    environment:
+      name: ${{ needs.detect.outputs.environment }}

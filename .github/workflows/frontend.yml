@@ -2,10 +2,6 @@ name: Deploy Frontend
 
 on:
   workflow_call:
-    inputs:
-      environment:
-        required: true
-        type: string
 
 jobs:
   deploy:
@@ -23,7 +19,7 @@ jobs:
         with:
           role-to-assume: ${{ secrets.ACTIONS_ROLE_ARN }}
           aws-region: ${{ secrets.AWS_REGION }}
-          role-session-name: "${{ github.event.inputs.environment }}"
+          role-session-name: "${{ vars.ENVIRONMENT }}"
 
       - name: Install Dependencies
         run: npm install
