@@ -10,85 +10,74 @@ on:
   workflow_dispatch:
 
 jobs:
-  setup:
-    name: Detect Affected Projects and Trigger Workflows
+  detect:
+    name: Detect Affected Projects
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
     outputs:
-      affected: ${{ steps.detect_affected.outputs.affected }}
+      frontend: ${{ steps.set.outputs.frontend }}
+      backend: ${{ steps.set.outputs.backend }}
+      infrastructure: ${{ steps.set.outputs.infrastructure }}
     steps:
-      - name: Checkout Code
+      - name: Checkout
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # required for full git diff
+          fetch-depth: 0
 
-      - name: Fetch main branch
+      - name: Fetch main
         run: git fetch origin main:main
 
       - name: Detect Affected Projects
-        id: detect_affected
+        id: detect
         run: |
-          echo "Detecting changes against main..."
           changed_files=$(git diff --name-only origin/main...HEAD)
+
+          echo "Changed files:"
           echo "$changed_files"
 
-          affected_projects="[]"
+          echo "frontend=false" >> $GITHUB_ENV
+          echo "backend=false" >> $GITHUB_ENV
+          echo "infrastructure=false" >> $GITHUB_ENV
 
           if echo "$changed_files" | grep -q "^frontend/"; then
-            affected_projects=$(echo "$affected_projects" | jq '. + ["frontend"]')
+            echo "frontend=true" >> $GITHUB_ENV
           fi
-
           if echo "$changed_files" | grep -q "^backend/"; then
-            affected_projects=$(echo "$affected_projects" | jq '. + ["backend"]')
+            echo "backend=true" >> $GITHUB_ENV
           fi
-
           if echo "$changed_files" | grep -q "^infrastructure/"; then
-            affected_projects=$(echo "$affected_projects" | jq '. + ["infrastructure"]')
+            echo "infrastructure=true" >> $GITHUB_ENV
           fi
 
-          echo "Affected projects: $affected_projects"
-          echo "affected=$affected_projects" >> $GITHUB_OUTPUT
+      - name: Set Boolean Outputs
+        id: set
+        run: |
+          echo "frontend=${{ env.frontend }}" >> $GITHUB_OUTPUT
+          echo "backend=${{ env.backend }}" >> $GITHUB_OUTPUT
+          echo "infrastructure=${{ env.infrastructure }}" >> $GITHUB_OUTPUT
 
-      - name: Trigger Infrastructure Workflow
-        if: contains(fromJson(steps.detect_affected.outputs.affected), 'infrastructure')
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const environment = context.ref === 'refs/heads/main' ? 'prod' : 'dev';
-            github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'infrastructure.yml',
-              ref: context.ref,
-              inputs: { environment }
-            });
+  infrastructure:
+    name: Deploy Infrastructure
+    if: ${{ needs.detect.outputs.infrastructure == 'true' }}
+    needs: detect
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy Infrastructure
+        run: echo "Running infrastructure deployment..." # Replace with your real deploy logic
 
-      - name: Trigger Backend Workflow
-        if: contains(fromJson(steps.detect_affected.outputs.affected), 'backend')
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const environment = context.ref === 'refs/heads/main' ? 'prod' : 'dev';
-            github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'backend.yml',
-              ref: context.ref,
-              inputs: { environment }
-            });
-
-      - name: Trigger Frontend Workflow
-        if: contains(fromJson(steps.detect_affected.outputs.affected), 'frontend')
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const environment = context.ref === 'refs/heads/main' ? 'prod' : 'dev';
-            github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'frontend.yml',
-              ref: context.ref,
-              inputs: { environment }
-            });
+  deploy:
+    name: Deploy Frontend & Backend
+    if: ${{ needs.detect.outputs.frontend == 'true' || needs.detect.outputs.backend == 'true' }}
+    needs: [detect, infrastructure]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        project: [frontend, backend]
+        include:
+          - project: frontend
+            run: ${{ needs.detect.outputs.frontend == 'true' }}
+          - project: backend
+            run: ${{ needs.detect.outputs.backend == 'true' }}
+    steps:
+      - name: Deploy ${{ matrix.project }}
+        if: matrix.run == true
+        run: echo "Running ${{ matrix.project }} deployment..." # Replace with your real deploy logic
