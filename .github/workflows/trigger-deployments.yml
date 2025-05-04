@@ -76,6 +76,7 @@ jobs:
     uses: ./.github/workflows/infrastructure.yml
     with:
       environment: ${{ needs.detect.outputs.environment }}
+    secrets: inherit
 
   deploy_backend:
     name: Deploy Backend
