@@ -1,3 +1,6 @@
+# file: .github/workflows/frontend.yml
+# This workflow deploys the frontend application to an S3 bucket. It is triggered by the main workflow when changes are detected in the frontend directory.
+
 name: Deploy Frontend
 
 on:

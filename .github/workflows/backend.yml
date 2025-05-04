@@ -1,3 +1,6 @@
+# file: .github/workflows/backend.yml
+# This workflow deploys the backend application (Lambda functions) to AWS. It is triggered by the main workflow when changes are detected in the backend directory.
+
 name: Deploy Backend
 
 on:

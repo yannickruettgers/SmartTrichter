@@ -1,3 +1,6 @@
+# .github/workflows/infrastructure.yml
+# Deploys infrastructure with Terraform, using an approval gate before apply
+
 name: Deploy Infrastructure
 
 on:
@@ -15,16 +18,23 @@ on:
         type: choice
         options:
           - dev
-          - prod  
+          - prod
 
 jobs:
-  deploy:
-    name: Deploy Infrastructure
+  plan:
+    name: Terraform Plan
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     permissions:
       id-token: write
       contents: read
+    env:
+      TF_VAR_aws_region: ${{ vars.AWS_REGION }}
+      TF_VAR_org_or_user: ${{ vars.ORG_OR_USER }}
+      TF_VAR_repo: ${{ vars.REPO }}
+      TF_VAR_allowed_actions: ${{ vars.ALLOWED_ACTIONS }}
+      TF_VAR_allowed_resources: ${{ vars.ALLOWED_RESOURCES }}
+      TF_VAR_environment: ${{ vars.ENVIRONMENT }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -33,7 +43,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.ACTIONS_ROLE_ARN }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          aws-region: ${{ vars.AWS_REGION }}
           role-session-name: "${{ vars.ENVIRONMENT }}"
 
       - name: Setup Terraform
@@ -50,8 +60,58 @@ jobs:
         working-directory: infrastructure
 
       - name: Terraform Plan
-        run: terraform plan -out=tfplan
+        run: |
+          terraform plan -out=tfplan
+          terraform show -no-color tfplan
         working-directory: infrastructure
+
+      - name: Upload Plan
+        uses: actions/upload-artifact@v3
+        with:
+          name: tfplan
+          path: infrastructure/tfplan
+
+  approval:
+    name: Manual Approval
+    needs: plan
+    uses: ./.github/workflows/approval-gate.yml
+
+  apply:
+    name: Terraform Apply
+    runs-on: ubuntu-latest
+    needs: approval
+    environment: ${{ inputs.environment }}
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      TF_VAR_aws_region: ${{ vars.AWS_REGION }}
+      TF_VAR_org_or_user: ${{ vars.ORG_OR_USER }}
+      TF_VAR_repo: ${{ vars.REPO }}
+      TF_VAR_allowed_actions: ${{ vars.ALLOWED_ACTIONS }}
+      TF_VAR_allowed_resources: ${{ vars.ALLOWED_RESOURCES }}
+      TF_VAR_environment: ${{ vars.ENVIRONMENT }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.ACTIONS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+          role-session-name: "${{ vars.ENVIRONMENT }}"
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: latest
+
+      - name: Download Plan
+        uses: actions/download-artifact@v3
+        with:
+          name: tfplan
+          path: infrastructure
 
       - name: Terraform Apply
         run: terraform apply tfplan

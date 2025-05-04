@@ -1,0 +1,17 @@
+# .github/workflows/approval-gate.yml
+# Reusable workflow to enforce manual approval via GitHub Environments
+
+name: Manual Approval Gate
+
+on:
+  workflow_call:
+
+jobs:
+  wait_for_approval:
+    name: Wait for Manual Approval
+    runs-on: ubuntu-latest
+    environment: approval  # Approval is triggered here
+    steps:
+      - name: Awaiting Approval
+        run: |
+          echo "Approval granted. Proceeding with the workflow."

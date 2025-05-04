@@ -1,11 +1,12 @@
+# file: .github/workflows/trigger-deployments.yml
+# This workflow triggers deployments for the frontend, backend, and infrastructure based on changes in the dev or main branches.
+
 name: Trigger Deployments
 
 on:
   push:
     branches:
       - dev
-  pull_request:
-    branches:
       - main
   workflow_dispatch:
 
