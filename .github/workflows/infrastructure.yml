@@ -38,6 +38,14 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4.2.2
+      
+      - name: Check if OIDC token is issued
+        run: |
+          if [ -z "$ACTIONS_ID_TOKEN_REQUEST_TOKEN" ]; then
+            echo "OIDC token was NOT issued"
+          else
+            echo "OIDC token was issued"
+          fi
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4.1.0
