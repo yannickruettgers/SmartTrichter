@@ -26,7 +26,7 @@ jobs:
       environment: ${{ steps.env.outputs.environment }}
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4.2.2
         with:
           fetch-depth: 0
 
