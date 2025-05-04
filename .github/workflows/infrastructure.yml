@@ -43,6 +43,12 @@ jobs:
         run: |
           echo "inputs env ${{ inputs.environment }}"
           echo "vars env ${{ vars.ENVIRONMENT }}"
+          if [ -z "${{ secrets.TEST_SECRET }}" ]; then
+            echo "::error::test secret is not set!"
+            exit 1
+          else
+            echo "test secret is set."
+          fi
           if [ -z "${{ secrets.ACTIONS_ROLE_ARN }}" ]; then
             echo "::error::role-to-assume (ACTIONS_ROLE_ARN) is not set!"
             exit 1
