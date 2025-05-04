@@ -41,7 +41,8 @@ jobs:
       
       - name: Validate role-to-assume is set
         run: |
-          echo "${{ vars.ENVIRONMENT }}"
+          echo "inputs env ${{ inputs.environment }}"
+          echo "vars env ${{ vars.ENVIRONMENT }}"
           if [ -z "${{ secrets.ACTIONS_ROLE_ARN }}" ]; then
             echo "::error::role-to-assume (ACTIONS_ROLE_ARN) is not set!"
             exit 1
