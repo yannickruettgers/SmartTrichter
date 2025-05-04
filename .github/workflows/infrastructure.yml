@@ -8,10 +8,8 @@ on:
     inputs:
       environment:
         required: true
-        type: choice
-        options:
-          - dev
-          - prod
+        type: string
+        description: The environment to deploy to (e.g., dev, prod).
   workflow_dispatch:
     inputs:
       environment:
