@@ -39,18 +39,14 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4.2.2
       
-      - name: Debug AWS Credentials Inputs
+      - name: Validate role-to-assume is set
         run: |
-          echo "role-to-assume: ${{ secrets.ACTIONS_ROLE_ARN }}"
-          echo "aws-region: ${{ vars.AWS_REGION }}"
-          echo "role-session-name: ${{ vars.ENVIRONMENT }}"
-      
-          if [ -z "$ACTIONS_ID_TOKEN_REQUEST_TOKEN" ]; then
-            echo "::error::OIDC token was NOT issued. Check permissions: id-token: write"
+          if [ -z "${{ secrets.ACTIONS_ROLE_ARN }}" ]; then
+            echo "::error::role-to-assume (ACTIONS_ROLE_ARN) is not set!"
+            exit 1
           else
-            echo "OIDC token issued successfully"
+            echo "role-to-assume (ACTIONS_ROLE_ARN) is set."
           fi
-        shell: bash
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4.1.0
