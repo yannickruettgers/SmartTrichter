@@ -40,7 +40,7 @@ jobs:
           role-session-name: "${{ vars.ENVIRONMENT }}"
 
       - name: Install Dependencies
-        run: npm install
+        run: npm ci
         working-directory: frontend
 
       - name: Build Frontend

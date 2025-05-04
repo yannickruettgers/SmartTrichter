@@ -1,0 +1,16 @@
+{
+    "name": "trichter-backend",
+    "version": "1.0.0",
+    "description": "Serverless backend for Trichter",
+    "main": "handler.js",
+    "type": "module",
+    "scripts": {
+      "deploy": "serverless deploy",
+      "remove": "serverless remove"
+    },
+    "devDependencies": {
+      "esbuild": "^0.21.0",
+      "serverless": "^3.38.0",
+      "serverless-esbuild": "^1.42.0"
+    }
+  }

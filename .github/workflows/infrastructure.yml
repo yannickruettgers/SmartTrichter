@@ -39,23 +39,6 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4.2.2
       
-      - name: Validate role-to-assume is set
-        run: |
-          echo "inputs env ${{ inputs.environment }}"
-          echo "vars env ${{ vars.ENVIRONMENT }}"
-          if [ -z "${{ secrets.TEST_SECRET }}" ]; then
-            echo "::error::test secret is not set!"
-            exit 1
-          else
-            echo "test secret is set."
-          fi
-          if [ -z "${{ secrets.ACTIONS_ROLE_ARN }}" ]; then
-            echo "::error::role-to-assume (ACTIONS_ROLE_ARN) is not set!"
-            exit 1
-          else
-            echo "role-to-assume (ACTIONS_ROLE_ARN) is set."
-          fi
-
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4.1.0
         with:

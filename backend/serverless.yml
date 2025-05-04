@@ -1,0 +1,44 @@
+service: trichter-backend
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: eu-central-1
+  stage: ${opt:stage, 'dev'}
+  environment:
+    ENVIRONMENT: ${self:provider.stage}
+
+  httpApi:
+    cors: true
+    logs: true
+
+    authorizers:
+      cognito:
+        type: jwt
+        identitySource: "$request.header.Authorization"
+        issuerUrl: https://cognito-idp.eu-central-1.amazonaws.com/${param:userPoolId}
+        audience:
+          - ${param:userPoolClientId}
+
+functions:
+  userCreation:
+    handler: user.handler
+    events:
+      - httpApi:
+          path: /user
+          method: post
+          authorizer:
+            name: cognito
+
+plugins:
+  - serverless-esbuild
+
+custom:
+  esbuild:
+    bundle: true
+    minify: false
+    sourcemap: true
+    exclude: ['aws-sdk']
+    target: node18

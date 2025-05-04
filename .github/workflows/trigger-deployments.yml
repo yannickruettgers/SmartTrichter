@@ -85,6 +85,7 @@ jobs:
     uses: ./.github/workflows/backend.yml
     with:
       environment: ${{ needs.detect.outputs.environment }}
+    secrets: inherit
 
   deploy_frontend:
     name: Deploy Frontend
@@ -93,3 +94,4 @@ jobs:
     uses: ./.github/workflows/frontend.yml
     with:
       environment: ${{ needs.detect.outputs.environment }}
+    secrets: inherit

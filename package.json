@@ -19,9 +19,5 @@
     "author": "Yannick-Luca Ruettgers",
     "license": "UNLICENSED",
     "dependencies": {
-        "aws-sdk": "^2.1357.0"
-    },
-    "devDependencies": {
-        "serverless": "^3.32.1"
     }
 }

@@ -93,98 +93,6 @@ resource "aws_s3_bucket" "app_bucket" {
   }
 }
 
-# Lambda Function for User Creation
-resource "aws_lambda_function" "user_creation_function" {
-  function_name = "${var.environment}-user-creation-function"
-  runtime       = "nodejs18.x"
-  handler       = "user.handler"
-  role          = aws_iam_role.lambda_execution_role.arn
-  filename      = var.user_creation_lambda_package
-
-  environment {
-    variables = {
-      ENVIRONMENT = var.environment
-    }
-  }
-
-  tags = {
-    Name        = "User Creation Lambda Function"
-    Environment = var.environment
-  }
-}
-
-# IAM Role for Lambda Execution
-resource "aws_iam_role" "lambda_execution_role" {
-  name = "${var.environment}-lambda-execution-role"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Effect = "Allow",
-        Principal = {
-          Service = "lambda.amazonaws.com"
-        },
-        Action = "sts:AssumeRole"
-      }
-    ]
-  })
-}
-
-# IAM Policy for Lambda Execution
-resource "aws_iam_policy" "lambda_execution_policy" {
-  name   = "${var.environment}-lambda-execution-policy"
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Effect   = "Allow",
-        Action   = ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
-        Resource = "arn:aws:logs:*:*:*"
-      }
-    ]
-  })
-}
-
-# Attach Policy to Lambda Role
-resource "aws_iam_role_policy_attachment" "lambda_execution_policy_attachment" {
-  role       = aws_iam_role.lambda_execution_role.name
-  policy_arn = aws_iam_policy.lambda_execution_policy.arn
-}
-
-# API Gateway
-resource "aws_apigatewayv2_api" "http_api" {
-  name          = "${var.environment}-http-api"
-  protocol_type = "HTTP"
-
-  tags = {
-    Name        = "HTTP API Gateway"
-    Environment = var.environment
-  }
-}
-
-# API Gateway Integration for User Creation Lambda
-resource "aws_apigatewayv2_integration" "user_creation_integration" {
-  api_id           = aws_apigatewayv2_api.http_api.id
-  integration_type = "AWS_PROXY"
-  integration_uri  = aws_lambda_function.user_creation_function.invoke_arn
-}
-
-# API Gateway Route for /user Endpoint
-resource "aws_apigatewayv2_route" "user_creation_route" {
-  api_id    = aws_apigatewayv2_api.http_api.id
-  route_key = "POST /user"
-
-  target = "integrations/${aws_apigatewayv2_integration.user_creation_integration.id}"
-}
-
-# API Gateway Stage
-resource "aws_apigatewayv2_stage" "default_stage" {
-  api_id      = aws_apigatewayv2_api.http_api.id
-  name        = "$default"
-  auto_deploy = true
-}
-
 # Cognito User Pool
 resource "aws_cognito_user_pool" "user_pool" {
   name = "${var.environment}-user-pool"
@@ -205,18 +113,4 @@ resource "aws_cognito_user_pool_client" "user_pool_client" {
   allowed_oauth_flows_user_pool_client = true
 
   callback_urls = ["https://your-app-callback-url"] # Update with your app's callback URL
-}
-
-# API Gateway Authorizer for Cognito
-resource "aws_apigatewayv2_authorizer" "cognito_authorizer" {
-  api_id       = aws_apigatewayv2_api.http_api.id
-  name         = "${var.environment}-cognito-authorizer"
-  authorizer_type = "JWT"
-
-  identity_sources = ["$request.header.Authorization"]
-
-  jwt_configuration {
-    audience = [aws_cognito_user_pool_client.user_pool_client.id]
-    issuer   = aws_cognito_user_pool.user_pool.endpoint
-  }
 }
