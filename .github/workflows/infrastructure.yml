@@ -8,8 +8,10 @@ on:
     inputs:
       environment:
         required: true
-        type: string
-        description: The environment to deploy to (e.g., dev, prod).
+        type: choice
+        options:
+          - dev
+          - prod
   workflow_dispatch:
     inputs:
       environment:
@@ -24,7 +26,7 @@ jobs:
   plan:
     name: Terraform Plan
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment }}
+    environment: dev
     permissions:
       id-token: write
       contents: read
