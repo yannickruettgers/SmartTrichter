@@ -52,7 +52,7 @@ jobs:
           terraform_version: latest
 
       - name: Terraform Init
-        run: terraform init -backend-config="key=${{ vars.ENVIRONMENT }}/terraform.tfstate"
+        run: terraform init # -backend-config="key=${{ vars.ENVIRONMENT }}/terraform.tfstate"
         working-directory: infrastructure
 
       - name: Select Terraform Workspace
