@@ -11,7 +11,8 @@ terraform {
     workspace_key_prefix = "env"
 #    key            = "terraform/state/trichter.tfstate"
     region         = "eu-central-1"
-    dynamodb_table = "terraform-state-locks"
+    use_lockfile = true
+#    dynamodb_table = "terraform-state-locks"
     encrypt        = true
   }
 }

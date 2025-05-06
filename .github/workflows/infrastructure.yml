@@ -112,7 +112,11 @@ jobs:
         with:
           name: tfplan
           path: infrastructure
-
+      
+      - name: Terraform Init
+        run: terraform init -input=false
+        working-directory: infrastructure
+      
       - name: Terraform Apply
         run: terraform apply tfplan
         working-directory: infrastructure
