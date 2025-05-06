@@ -117,6 +117,10 @@ jobs:
         run: terraform init -input=false
         working-directory: infrastructure
       
+      - name: Select Terraform Workspace
+        run: terraform workspace select ${{ vars.ENVIRONMENT }}
+        working-directory: infrastructure
+
       - name: Terraform Apply
         run: terraform apply tfplan
         working-directory: infrastructure
