@@ -30,10 +30,6 @@ jobs:
       contents: read
     env:
       TF_VAR_aws_region: ${{ vars.AWS_REGION }}
-      TF_VAR_org_or_user: ${{ vars.ORG_OR_USER }}
-      TF_VAR_repo: ${{ vars.REPO }}
-      TF_VAR_allowed_actions: ${{ vars.ALLOWED_ACTIONS }}
-      TF_VAR_allowed_resources: ${{ vars.ALLOWED_RESOURCES }}
       TF_VAR_environment: ${{ vars.ENVIRONMENT }}
     steps:
       - name: Checkout Code
@@ -86,14 +82,20 @@ jobs:
       contents: read
     env:
       TF_VAR_aws_region: ${{ vars.AWS_REGION }}
-      TF_VAR_org_or_user: ${{ vars.ORG_OR_USER }}
-      TF_VAR_repo: ${{ vars.REPO }}
-      TF_VAR_allowed_actions: ${{ vars.ALLOWED_ACTIONS }}
-      TF_VAR_allowed_resources: ${{ vars.ALLOWED_RESOURCES }}
       TF_VAR_environment: ${{ vars.ENVIRONMENT }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
+
+      - name: Install GitHub CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gh
+
+      - name: Authenticate GitHub CLI
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT_UPDATE_SECRETS }}
+        run: gh auth setup-git        
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4.1.0
@@ -124,3 +126,16 @@ jobs:
       - name: Terraform Apply
         run: terraform apply tfplan
         working-directory: infrastructure
+
+      - name: Set Cognito Secrets in Environment
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT_UPDATE_SECRETS }}
+          ENV: ${{ inputs.environment }}
+        run: |
+          cd infrastructure
+          user_pool_id=$(terraform output -raw user_pool_id)
+          user_pool_client_id=$(terraform output -raw user_pool_client_id)
+      
+          echo "$user_pool_id" | gh secret set COGNITO_USER_POOL_ID --env "$ENV"
+          echo "$user_pool_client_id" | gh secret set COGNITO_USER_POOL_CLIENT_ID --env "$ENV"
+      

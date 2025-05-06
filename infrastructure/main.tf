@@ -67,3 +67,4 @@ resource "aws_cognito_user_pool_client" "user_pool_client" {
 
   callback_urls = ["https://your-app-callback-url"] # Update with your app's callback URL
 }
+
