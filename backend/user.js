@@ -1,6 +1,6 @@
 // backend/handler.js
 
-exports.user = async (event) => {
+exports.handler = async (event) => {
     console.log("Received event:", JSON.stringify(event, null, 2));
   
     return {

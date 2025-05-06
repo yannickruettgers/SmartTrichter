@@ -12,7 +12,6 @@ provider:
 
   httpApi:
     cors: true
-    logs: true
 
     authorizers:
       cognito:
