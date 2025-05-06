@@ -39,7 +39,7 @@ resource "aws_dynamodb_table" "terraform_locks" {
 }
 
 resource "aws_s3_bucket" "app_bucket" {
-  bucket = "$var.environment}-trichter-app-bucket"
+  bucket = "${var.environment}-trichter-app-bucket"
   tags = {
     Name        = "Trichter App Bucket"
     Environment = var.environment
